@@ -1,5 +1,5 @@
 {
-  "name": "react-native-background-upload",
+  "name": "@appfolio/react-native-upload",
   "version": "6.2.3",
   "description": "Cross platform http post file uploader with android and iOS background support",
   "main": "src/index.js",
@@ -8,10 +8,6 @@
     "lint:ci": "eslint src example",
     "test": "echo \"Error: no test specified\" && exit 1",
     "release": "semantic-release"
-  },
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/Vydia/react-native-background-upload.git"
   },
   "keywords": [
     "NSURLSession",
@@ -30,7 +26,14 @@
   "bugs": {
     "url": "https://github.com/Vydia/react-native-background-upload/issues"
   },
-  "homepage": "https://github.com/Vydia/react-native-background-upload#readme",
+  "homepage": "https://github.com/appfolio/react-native-upload",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/appfolio/react-native-upload.git"
+  },
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com/"
+  },
   "devDependencies": {
     "@react-native-community/eslint-config": "^0.0.7",
     "@semantic-release/commit-analyzer": "^6.3.3",
