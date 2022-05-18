@@ -1,7 +1,7 @@
 {
   "name": "@appfolio/react-native-upload",
   "version": "6.6.2",
-  "description": "Cross platform http post file uploader with android and iOS background support",
+  "description": "Cross platform http post file uploader with Android and iOS background support.",
   "main": "src/index.js",
   "scripts": {
     "lint": "yarn lint:ci --fix",
