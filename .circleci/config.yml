@@ -1,0 +1,15 @@
+version: 2.1
+orbs:
+  node: circleci/node@5.0.0
+jobs:
+  release:
+    executor: node/default
+    steps:
+      - checkout
+      - run: yarn install
+      - run: yarn release
+
+workflows:
+  perform_release:
+    jobs:
+      - release
