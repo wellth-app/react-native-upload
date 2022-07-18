@@ -1,4 +1,4 @@
-package com.vydia.RNUploader
+package com.appfolio.uploader
 
 import android.app.Application
 import android.app.NotificationChannel
@@ -7,17 +7,15 @@ import android.content.Context
 import android.os.Build
 import android.util.Log
 import android.webkit.MimeTypeMap
+import com.appfolio.work.UploadManager
 import com.facebook.react.BuildConfig
 import com.facebook.react.bridge.*
-import net.gotev.uploadservice.UploadService
 import net.gotev.uploadservice.UploadServiceConfig.httpStack
 import net.gotev.uploadservice.UploadServiceConfig.initialize
 import net.gotev.uploadservice.data.UploadNotificationConfig
 import net.gotev.uploadservice.data.UploadNotificationStatusConfig
 import net.gotev.uploadservice.observer.request.GlobalRequestObserver
 import net.gotev.uploadservice.okhttp.OkHttpStack
-import net.gotev.uploadservice.protocols.binary.BinaryUploadRequest
-import net.gotev.uploadservice.protocols.multipart.MultipartUploadRequest
 import okhttp3.OkHttpClient
 import java.io.File
 import java.util.concurrent.TimeUnit
@@ -187,7 +185,7 @@ class UploaderModule(val reactContext: ReactApplicationContext) : ReactContextBa
     val customUploadId = if (options.hasKey("customUploadId") && options.getType("method") == ReadableType.String) options.getString("customUploadId") else null
     try {
       val request = if (requestType == "raw") {
-        BinaryUploadRequest(this.reactApplicationContext, url!!)
+        ModifiedBinaryUploadRequest(this.reactApplicationContext, url!!)
                 .setFileToUpload(filePath!!)
       } else {
         if (!options.hasKey("field")) {
@@ -198,7 +196,7 @@ class UploaderModule(val reactContext: ReactApplicationContext) : ReactContextBa
           promise.reject(java.lang.IllegalArgumentException("field must be string."))
           return
         }
-        MultipartUploadRequest(this.reactApplicationContext, url!!)
+        ModifiedMultipartUploadRequest(this.reactApplicationContext, url!!)
                 .addFileToUpload(filePath!!, options.getString("field")!!)
       }
       request.setMethod(method!!)
@@ -281,7 +279,7 @@ class UploaderModule(val reactContext: ReactApplicationContext) : ReactContextBa
       return
     }
     try {
-      UploadService.stopUpload(cancelUploadId)
+      UploadManager.stopUpload(cancelUploadId)
       promise.resolve(true)
     } catch (exc: java.lang.Exception) {
       exc.printStackTrace()
@@ -296,7 +294,7 @@ class UploaderModule(val reactContext: ReactApplicationContext) : ReactContextBa
   @ReactMethod
   fun stopAllUploads(promise: Promise) {
     try {
-      UploadService.stopAllUploads()
+      UploadManager.stopAllUploads()
       promise.resolve(true)
     } catch (exc: java.lang.Exception) {
       exc.printStackTrace()

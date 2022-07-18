@@ -1,4 +1,4 @@
-package com.vydia.RNUploader
+package com.appfolio.uploader
 
 import android.content.Context
 import android.util.Log
