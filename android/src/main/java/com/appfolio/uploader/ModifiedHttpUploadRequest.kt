@@ -1,12 +1,11 @@
 package com.appfolio.uploader
 
 import android.content.Context
-import androidx.work.Data
-import androidx.work.OneTimeWorkRequestBuilder
+import androidx.work.OneTimeWorkRequest
 import androidx.work.WorkManager
+import com.appfolio.extensions.setData
 import com.appfolio.work.UploadManager
 import com.appfolio.work.UploadWorker
-import com.google.gson.Gson
 import net.gotev.uploadservice.HttpUploadRequest
 import net.gotev.uploadservice.data.UploadTaskParameters
 import java.util.*
@@ -39,13 +38,9 @@ abstract class ModifiedHttpUploadRequest<B : HttpUploadRequest<B>>(context: Cont
           "already running task. You're trying to use the same ID for multiple uploads."
     }
 
-    val gson = Gson()
     val workManager: WorkManager = WorkManager.getInstance(context)
-    val uploadRequest = OneTimeWorkRequestBuilder<UploadWorker>()
-    val data = Data.Builder()
-    data.putString(UploadWorker.PARAM_KEY_TASK_PARAMS, uploadTaskParameters.toPersistableData().toJson())
-    data.putString(UploadWorker.PARAM_KEY_NOTIF_CONFIG, gson.toJson(notificationConfig(context, uploadId)))
-    uploadRequest.setInputData(data.build())
+    val uploadRequest = OneTimeWorkRequest.Builder(UploadWorker::class.java)
+    uploadRequest.setData(uploadTaskParameters, notificationConfig(context, uploadId))
     workManager.enqueue(uploadRequest.build())
 
     return uploadTaskParameters.id;
