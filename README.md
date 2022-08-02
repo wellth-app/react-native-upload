@@ -223,6 +223,13 @@ Adds an event listener, possibly confined to a single upload.
 
 Returns an [EventSubscription](https://github.com/facebook/react-native/blob/master/Libraries/vendor/emitter/EmitterSubscription.js). To remove the listener, call `remove()` on the `EventSubscription`.
 
+### shouldLimitNetwork(limit)
+
+`limit` boolean, sets whether or not to limit network usage.
+
+On Android, this setting takes effect immediately and will be applied for the next upload. On iOS, this setting will be only applied for the next NSURLSession.
+
+
 ## Events
 
 ### progress

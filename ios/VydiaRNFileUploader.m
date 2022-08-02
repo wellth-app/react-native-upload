@@ -17,6 +17,7 @@ static NSString *BACKGROUND_SESSION_ID = @"ReactNativeBackgroundUpload";
 NSMutableDictionary *_responsesData;
 NSURLSession *_urlSession = nil;
 void (^backgroundSessionCompletionHandler)(void) = nil;
+BOOL limitNetwork = NO;
 
 + (BOOL)requiresMainQueueSetup {
     return YES;
@@ -268,6 +269,10 @@ RCT_EXPORT_METHOD(canSuspendIfBackground) {
     }
 }
 
+RCT_EXPORT_METHOD(shouldLimitNetwork: (BOOL) limit) {
+    limitNetwork = limit;
+}
+
 - (NSData *)createBodyWithBoundary:(NSString *)boundary
             path:(NSString *)path
             parameters:(NSDictionary *)parameters
@@ -313,6 +318,9 @@ RCT_EXPORT_METHOD(canSuspendIfBackground) {
         NSURLSessionConfiguration *sessionConfiguration = [NSURLSessionConfiguration backgroundSessionConfigurationWithIdentifier:BACKGROUND_SESSION_ID];
         if (groupId != nil && ![groupId isEqualToString:@""]) {
             sessionConfiguration.sharedContainerIdentifier = groupId;
+        }
+        if (limitNetwork) {
+            sessionConfiguration.allowsCellularAccess = NO;
         }
         _urlSession = [NSURLSession sessionWithConfiguration:sessionConfiguration delegate:self delegateQueue:nil];
     }

@@ -9,8 +9,8 @@ import net.gotev.uploadservice.data.UploadFile
 import net.gotev.uploadservice.protocols.multipart.MultipartUploadTask
 import java.io.FileNotFoundException
 
-class ModifiedMultipartUploadRequest(context: Context, serverUrl: String)  :
-    ModifiedHttpUploadRequest<ModifiedMultipartUploadRequest>(context, serverUrl) {
+class ModifiedMultipartUploadRequest(context: Context, serverUrl: String, limitNetwork: Boolean)  :
+    ModifiedHttpUploadRequest<ModifiedMultipartUploadRequest>(context, serverUrl, limitNetwork) {
 
   override val taskClass: Class<out UploadTask>
     get() = MultipartUploadTask::class.java

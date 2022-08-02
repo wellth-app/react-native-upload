@@ -125,10 +125,15 @@ export const canSuspendIfBackground = () => {
   }
 };
 
+export const shouldLimitNetwork = (limit: boolean) => {
+  NativeModule.shouldLimitNetwork(limit);
+};
+
 export default {
   startUpload,
   cancelUpload,
   addListener,
   getFileInfo,
   canSuspendIfBackground,
+  shouldLimitNetwork,
 };
