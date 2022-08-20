@@ -273,6 +273,39 @@ RCT_EXPORT_METHOD(shouldLimitNetwork: (BOOL) limit) {
     limitNetwork = limit;
 }
 
+RCT_EXPORT_METHOD(getAllUploads:(RCTPromiseResolveBlock)resolve
+                  reject:(RCTPromiseRejectBlock)reject)
+{
+    NSString *appGroup = nil;
+    [[self urlSession: appGroup] getTasksWithCompletionHandler:^(NSArray *dataTasks, NSArray *uploadTasks, NSArray *downloadTasks) {
+        NSMutableArray *uploads = [NSMutableArray new];
+        for (NSURLSessionUploadTask *uploadTask in uploadTasks) {
+            NSString *state;
+            switch (uploadTask.state) {
+            case NSURLSessionTaskStateRunning:
+                state = @"running";
+                break;
+            case NSURLSessionTaskStateSuspended:
+                state = @"pending";
+                break;
+            case NSURLSessionTaskStateCanceling:
+                state = @"cancelled";
+                break;
+            case NSURLSessionTaskStateCompleted:
+                state = @"completed";
+                break;
+            }
+            
+            NSDictionary *upload = @{
+                @"id" : uploadTask.taskDescription,
+                @"state" : state
+            };
+            [uploads addObject:upload];
+        }
+        resolve(uploads);
+    }];
+}
+
 - (NSData *)createBodyWithBoundary:(NSString *)boundary
             path:(NSString *)path
             parameters:(NSDictionary *)parameters

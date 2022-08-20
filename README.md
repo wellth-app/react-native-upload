@@ -229,6 +229,18 @@ Returns an [EventSubscription](https://github.com/facebook/react-native/blob/mas
 
 On Android, this setting takes effect immediately and will be applied for the next upload. On iOS, this setting will be only applied for the next NSURLSession.
 
+### getAllUploads()
+
+Retrieves all scheduled uploads and their state from system's internal database.
+
+Note that this will not give you all the uploads ever scheduled, both iOS and Android periodically prune completed(succeeded/failed/cancelled) tasks from their database. Therefore this should not be used as the primary way to check upload statuses, add your listeners via `addListener` instead. However, `getAllUploads` is particularly useful as a backup plan in case events were dropped(e.g. adding listeners too late).
+
+Returns a Promise that resolves to an array of objects containing:
+
+|Name|Type|Required|Description|
+|---|---|---|---|---|
+|`id`|string|Required|The upload ID from `startUpload`|
+|`state`|[UploadState](#uploadstate)|Required|The current state of the upload|
 
 ## Events
 
@@ -267,6 +279,17 @@ Event Data
 |Name|Type|Required|Description|
 |---|---|---|---|
 |`id`|string|Required|The ID of the upload.|
+
+## Types
+
+### UploadState
+
+|Value|Description|
+|---|---|
+|`cancelled`|The upload has been cancelled, either by OS or by using `cancelUpload`|
+|`completed`|The upload has finished, either succeeded or failed|
+|`pending`|The upload is scheduled but not active at the moment|
+|`running`|The upload is in progress|
 
 # Customizing Android Build Properties
 You may want to customize the `compileSdk, buildToolsVersion, and targetSdkVersion` versions used by this package.  For that, add this to `android/build.gradle`:

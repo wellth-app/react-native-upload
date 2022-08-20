@@ -112,6 +112,13 @@ declare module '@appfolio/react-native-upload' {
     | 'completed'
     | 'cancelled';
 
+  export enum UploadState {
+    Cancelled = 'cancelled',
+    Completed = 'completed',
+    Pending = 'pending',
+    Running = 'running',
+  }
+
   export default class Upload {
     static startUpload(
       options: UploadOptions | MultipartUploadOptions,
@@ -138,7 +145,8 @@ declare module '@appfolio/react-native-upload' {
     ): EventSubscription;
     static getFileInfo(path: string): Promise<FileInfo>;
     static cancelUpload(uploadId: uploadId): Promise<boolean>;
-    static canSuspendIfBackground();
-    static shouldLimitNetwork(limit: boolean);
+    static canSuspendIfBackground(): void;
+    static shouldLimitNetwork(limit: boolean): void;
+    static getAllUploads(): Promise<Array<{ id: string, state: UploadState }>>;
   }
 }

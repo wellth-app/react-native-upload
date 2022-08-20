@@ -42,6 +42,7 @@ abstract class ModifiedHttpUploadRequest<B : HttpUploadRequest<B>>(context: Cont
     val workManager: WorkManager = WorkManager.getInstance(context)
     val uploadRequest = OneTimeWorkRequest.Builder(UploadWorker::class.java)
     uploadRequest.shouldLimitNetwork(limitNetwork)
+    uploadRequest.addTag("${UploadWorker::class.java.simpleName}-$uploadId")
     uploadRequest.setData(uploadTaskParameters, notificationConfig(context, uploadId))
     workManager.enqueue(uploadRequest.build())
 
