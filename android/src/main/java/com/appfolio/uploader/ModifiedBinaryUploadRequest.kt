@@ -7,8 +7,8 @@ import net.gotev.uploadservice.protocols.binary.BinaryUploadTask
 import java.io.FileNotFoundException
 import java.io.IOException
 
-class ModifiedBinaryUploadRequest(context: Context, serverUrl: String) :
-    ModifiedHttpUploadRequest<ModifiedBinaryUploadRequest>(context, serverUrl) {
+class ModifiedBinaryUploadRequest(context: Context, serverUrl: String, limitNetwork: Boolean) :
+    ModifiedHttpUploadRequest<ModifiedBinaryUploadRequest>(context, serverUrl, limitNetwork) {
 
   override val taskClass: Class<out UploadTask>
     get() = BinaryUploadTask::class.java

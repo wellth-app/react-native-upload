@@ -1,6 +1,8 @@
 package com.appfolio.extensions
 
+import androidx.work.Constraints
 import androidx.work.Data
+import androidx.work.NetworkType
 import androidx.work.OneTimeWorkRequest
 import com.google.gson.Gson
 import net.gotev.uploadservice.data.UploadFile
@@ -46,4 +48,10 @@ internal fun OneTimeWorkRequest.Builder.setData(uploadTaskParameters: UploadTask
   data.putString(PARAM_KEY_TASK_PARAMS, uploadTaskParameters.toJson())
   data.putString(PARAM_KEY_NOTIF_CONFIG, notificationConfig.toJson())
   setInputData(data.build())
+}
+
+internal fun OneTimeWorkRequest.Builder.shouldLimitNetwork(limit: Boolean) {
+  val network = if (limit) NetworkType.UNMETERED else NetworkType.CONNECTED
+  val constraints = Constraints.Builder().setRequiredNetworkType(network).build()
+  setConstraints(constraints)
 }

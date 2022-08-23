@@ -24,9 +24,18 @@ class UploaderModule(val reactContext: ReactApplicationContext) : ReactContextBa
   private val TAG = "UploaderBridge"
   private var notificationChannelID = "BackgroundUploadChannel"
   private var isGlobalRequestObserver = false
+  private var limitNetwork = false
 
   override fun getName(): String {
     return "RNFileUploader"
+  }
+
+  /*
+    Sets uploading network limit to unmetered network.
+   */
+  @ReactMethod
+  fun shouldLimitNetwork(limit: Boolean) {
+    limitNetwork = limit;
   }
 
   /*
@@ -185,7 +194,7 @@ class UploaderModule(val reactContext: ReactApplicationContext) : ReactContextBa
     val customUploadId = if (options.hasKey("customUploadId") && options.getType("method") == ReadableType.String) options.getString("customUploadId") else null
     try {
       val request = if (requestType == "raw") {
-        ModifiedBinaryUploadRequest(this.reactApplicationContext, url!!)
+        ModifiedBinaryUploadRequest(this.reactApplicationContext, url!!, limitNetwork)
                 .setFileToUpload(filePath!!)
       } else {
         if (!options.hasKey("field")) {
@@ -196,7 +205,7 @@ class UploaderModule(val reactContext: ReactApplicationContext) : ReactContextBa
           promise.reject(java.lang.IllegalArgumentException("field must be string."))
           return
         }
-        ModifiedMultipartUploadRequest(this.reactApplicationContext, url!!)
+        ModifiedMultipartUploadRequest(this.reactApplicationContext, url!!, limitNetwork)
                 .addFileToUpload(filePath!!, options.getString("field")!!)
       }
       request.setMethod(method!!)

@@ -138,6 +138,7 @@ declare module '@appfolio/react-native-upload' {
     ): EventSubscription;
     static getFileInfo(path: string): Promise<FileInfo>;
     static cancelUpload(uploadId: uploadId): Promise<boolean>;
-    static canSuspendIfBackground(): Promise<void>;
+    static canSuspendIfBackground();
+    static shouldLimitNetwork(limit: boolean);
   }
 }

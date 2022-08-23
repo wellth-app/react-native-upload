@@ -4,13 +4,14 @@ import android.content.Context
 import androidx.work.OneTimeWorkRequest
 import androidx.work.WorkManager
 import com.appfolio.extensions.setData
+import com.appfolio.extensions.shouldLimitNetwork
 import com.appfolio.work.UploadManager
 import com.appfolio.work.UploadWorker
 import net.gotev.uploadservice.HttpUploadRequest
 import net.gotev.uploadservice.data.UploadTaskParameters
 import java.util.*
 
-abstract class ModifiedHttpUploadRequest<B : HttpUploadRequest<B>>(context: Context, serverUrl: String) :
+abstract class ModifiedHttpUploadRequest<B : HttpUploadRequest<B>>(context: Context, serverUrl: String, private val limitNetwork: Boolean = false) :
     HttpUploadRequest<B>(context, serverUrl) {
 
   private var started: Boolean = false
@@ -40,6 +41,7 @@ abstract class ModifiedHttpUploadRequest<B : HttpUploadRequest<B>>(context: Cont
 
     val workManager: WorkManager = WorkManager.getInstance(context)
     val uploadRequest = OneTimeWorkRequest.Builder(UploadWorker::class.java)
+    uploadRequest.shouldLimitNetwork(limitNetwork)
     uploadRequest.setData(uploadTaskParameters, notificationConfig(context, uploadId))
     workManager.enqueue(uploadRequest.build())
 
