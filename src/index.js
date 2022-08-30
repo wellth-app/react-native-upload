@@ -129,6 +129,17 @@ export const shouldLimitNetwork = (limit: boolean) => {
   NativeModule.shouldLimitNetwork(limit);
 };
 
+export const UploadState = {
+  Cancelled: 'cancelled',
+  Completed: 'completed',
+  Pending: 'pending',
+  Running: 'running',
+};
+
+export const getAllUploads = () => {
+  return NativeModule.getAllUploads();
+};
+
 export default {
   startUpload,
   cancelUpload,
@@ -136,4 +147,5 @@ export default {
   getFileInfo,
   canSuspendIfBackground,
   shouldLimitNetwork,
+  getAllUploads,
 };

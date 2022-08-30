@@ -11,7 +11,6 @@
 RCT_EXPORT_MODULE();
 
 @synthesize bridge = _bridge;
-static int uploadId = 0;
 static VydiaRNFileUploader* staticInstance = nil;
 static NSString *BACKGROUND_SESSION_ID = @"ReactNativeBackgroundUpload";
 NSMutableDictionary *_responsesData;
@@ -55,7 +54,7 @@ BOOL limitNetwork = NO;
     // JS side is ready to receive events; create the background url session if necessary
     // iOS will then deliver the tasks completed while the app was dead (if any)
     NSString *appGroup = nil;
-    double delayInSeconds = 30;
+    double delayInSeconds = 5;
     dispatch_time_t popTime = dispatch_time(DISPATCH_TIME_NOW, delayInSeconds * NSEC_PER_SEC);
     dispatch_after(popTime, dispatch_get_main_queue(), ^(void){
         [self urlSession:appGroup];
@@ -165,12 +164,6 @@ RCT_EXPORT_METHOD(getFileInfo:(NSString *)path resolve:(RCTPromiseResolveBlock)r
  */
 RCT_EXPORT_METHOD(startUpload:(NSDictionary *)options resolve:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject)
 {
-    int thisUploadId;
-    @synchronized(self.class)
-    {
-        thisUploadId = uploadId++;
-    }
-
     NSString *uploadUrl = options[@"url"];
     __block NSString *fileURI = options[@"path"];
     NSString *method = options[@"method"] ?: @"POST";
@@ -235,7 +228,8 @@ RCT_EXPORT_METHOD(startUpload:(NSDictionary *)options resolve:(RCTPromiseResolve
             uploadTask = [[self urlSession: appGroup] uploadTaskWithRequest:request fromFile:[NSURL URLWithString: fileURI]];
         }
 
-        uploadTask.taskDescription = customUploadId ? customUploadId : [NSString stringWithFormat:@"%i", thisUploadId];
+        NSString *uploadId = customUploadId ? customUploadId : [[NSUUID UUID] UUIDString];
+        uploadTask.taskDescription = uploadId;
 
         [uploadTask resume];
         resolve(uploadTask.taskDescription);
@@ -271,6 +265,39 @@ RCT_EXPORT_METHOD(canSuspendIfBackground) {
 
 RCT_EXPORT_METHOD(shouldLimitNetwork: (BOOL) limit) {
     limitNetwork = limit;
+}
+
+RCT_EXPORT_METHOD(getAllUploads:(RCTPromiseResolveBlock)resolve
+                  reject:(RCTPromiseRejectBlock)reject)
+{
+    NSString *appGroup = nil;
+    [[self urlSession: appGroup] getTasksWithCompletionHandler:^(NSArray *dataTasks, NSArray *uploadTasks, NSArray *downloadTasks) {
+        NSMutableArray *uploads = [NSMutableArray new];
+        for (NSURLSessionUploadTask *uploadTask in uploadTasks) {
+            NSString *state;
+            switch (uploadTask.state) {
+            case NSURLSessionTaskStateRunning:
+                state = @"running";
+                break;
+            case NSURLSessionTaskStateSuspended:
+                state = @"pending";
+                break;
+            case NSURLSessionTaskStateCanceling:
+                state = @"cancelled";
+                break;
+            case NSURLSessionTaskStateCompleted:
+                state = @"completed";
+                break;
+            }
+            
+            NSDictionary *upload = @{
+                @"id" : uploadTask.taskDescription,
+                @"state" : state
+            };
+            [uploads addObject:upload];
+        }
+        resolve(uploads);
+    }];
 }
 
 - (NSData *)createBodyWithBoundary:(NSString *)boundary
