@@ -39,6 +39,7 @@ abstract class ModifiedHttpUploadRequest<B : HttpUploadRequest<B>>(context: Cont
           "already running task. You're trying to use the same ID for multiple uploads."
     }
 
+    started = true
     val workManager: WorkManager = WorkManager.getInstance(context)
     val uploadRequest = OneTimeWorkRequest.Builder(UploadWorker::class.java)
     uploadRequest.shouldLimitNetwork(limitNetwork)
