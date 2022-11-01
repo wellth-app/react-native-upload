@@ -238,7 +238,7 @@ Note that this will not give you all the uploads ever scheduled, both iOS and An
 Returns a Promise that resolves to an array of objects containing:
 
 |Name|Type|Required|Description|
-|---|---|---|---|---|
+|---|---|---|---|
 |`id`|string|Required|The upload ID from `startUpload`|
 |`state`|[UploadState](#uploadstate)|Required|The current state of the upload|
 
