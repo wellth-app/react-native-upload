@@ -119,6 +119,8 @@ declare module '@appfolio/react-native-upload' {
     Running = 'running',
   }
 
+  export type SystemUploadStates = Array<{ id: string, state: UploadState }>;
+
   export default class Upload {
     static startUpload(
       options: UploadOptions | MultipartUploadOptions,
@@ -147,6 +149,6 @@ declare module '@appfolio/react-native-upload' {
     static cancelUpload(uploadId: uploadId): Promise<boolean>;
     static canSuspendIfBackground(): void;
     static shouldLimitNetwork(limit: boolean): void;
-    static getAllUploads(): Promise<Array<{ id: string, state: UploadState }>>;
+    static getAllUploads(): Promise<SystemUploadStates>;
   }
 }
