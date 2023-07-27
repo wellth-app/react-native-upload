@@ -268,7 +268,7 @@ class UploaderModule(val reactContext: ReactApplicationContext) : ReactContextBa
         }
       }
       if (customUploadId != null)
-        request.setUploadID(customUploadId)
+        request.setCustomUploadID(customUploadId)
 
       val uploadId = request.startUpload()
       promise.resolve(uploadId)
