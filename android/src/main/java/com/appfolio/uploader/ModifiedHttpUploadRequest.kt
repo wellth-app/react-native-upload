@@ -49,4 +49,9 @@ abstract class ModifiedHttpUploadRequest<B : HttpUploadRequest<B>>(context: Cont
 
     return uploadTaskParameters.id;
   }
+
+  fun setCustomUploadID(uploadID: String) {
+    this.uploadId = uploadID
+    setUploadID(uploadID)
+  }
 }
