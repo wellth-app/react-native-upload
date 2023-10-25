@@ -209,16 +209,19 @@ RCT_EXPORT_METHOD(startUpload:(NSDictionary *)options resolve:(RCTPromiseResolve
             dispatch_group_wait(group, DISPATCH_TIME_FOREVER);
         }
 
+        NSString *uploadId = customUploadId ? customUploadId : [[NSUUID UUID] UUIDString];
         NSURLSessionUploadTask *uploadTask;
 
         if ([uploadType isEqualToString:@"multipart"]) {
             NSString *uuidStr = [[NSUUID UUID] UUIDString];
             [request setValue:[NSString stringWithFormat:@"multipart/form-data; boundary=%@", uuidStr] forHTTPHeaderField:@"Content-Type"];
 
-            NSData *httpBody = [self createBodyWithBoundary:uuidStr path:fileURI parameters: parameters fieldName:fieldName];
-            [request setHTTPBody: httpBody];
+            NSData *multipartData = [self createBodyWithBoundary:uuidStr path:fileURI parameters: parameters fieldName:fieldName];
+            
+            NSURL *multipartDataFileUrl = [NSURL fileURLWithPath:[NSString stringWithFormat:@"%@/%@", [self getTmpDirectory], uploadId]];
+            [multipartData writeToURL:multipartDataFileUrl atomically:YES];
 
-            uploadTask = [[self urlSession: appGroup] uploadTaskWithStreamedRequest:request];
+            uploadTask = [[self urlSession: appGroup] uploadTaskWithRequest:request fromFile:multipartDataFileUrl];
         } else {
             if (parameters.count > 0) {
                 reject(@"RN Uploader", @"Parameters supported only in multipart type", nil);
@@ -228,7 +231,6 @@ RCT_EXPORT_METHOD(startUpload:(NSDictionary *)options resolve:(RCTPromiseResolve
             uploadTask = [[self urlSession: appGroup] uploadTaskWithRequest:request fromFile:[NSURL URLWithString: fileURI]];
         }
 
-        NSString *uploadId = customUploadId ? customUploadId : [[NSUUID UUID] UUIDString];
         uploadTask.taskDescription = uploadId;
 
         [uploadTask resume];
@@ -355,7 +357,17 @@ RCT_EXPORT_METHOD(getAllUploads:(RCTPromiseResolveBlock)resolve
     return _urlSession;
 }
 
-#pragma NSURLSessionTaskDelegate
+- (NSString *)getTmpDirectory {
+    NSFileManager *manager = [NSFileManager defaultManager];
+    NSString *namespace = @"react-native-upload";
+    NSString *tmpPath = [NSTemporaryDirectory() stringByAppendingString:namespace];
+    
+    [manager createDirectoryAtPath: tmpPath withIntermediateDirectories:YES attributes:nil error:nil];
+    
+    return tmpPath;
+}
+
+#pragma mark - NSURLSessionTaskDelegate
 
 - (void)URLSession:(NSURLSession *)session
               task:(NSURLSessionTask *)task
@@ -390,6 +402,9 @@ didCompleteWithError:(NSError *)error {
             [self _sendEventWithName:@"RNFileUploader-error" body:data];
         }
     }
+
+    NSURL *multipartDataFileUrl = [NSURL fileURLWithPath:[NSString stringWithFormat:@"%@/%@", [self getTmpDirectory], task.taskDescription]];
+    [[NSFileManager defaultManager] removeItemAtURL:multipartDataFileUrl error:nil];
 }
 
 - (void)URLSession:(NSURLSession *)session
@@ -418,6 +433,8 @@ totalBytesExpectedToSend:(int64_t)totalBytesExpectedToSend {
         [responseData appendData:data];
     }
 }
+
+#pragma mark - NSURLSessionDelegate
 
 - (void)URLSessionDidFinishEventsForBackgroundURLSession:(NSURLSession *)session {
     if (backgroundSessionCompletionHandler) {
