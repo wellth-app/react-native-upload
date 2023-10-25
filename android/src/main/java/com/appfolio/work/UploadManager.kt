@@ -88,6 +88,15 @@ class UploadManager {
     }
 
     /**
+     * Called by each task when it errors out.
+     * @param uploadId the uploadID of the task with error
+     */
+    @Synchronized
+    fun taskFailed(uploadId: String) {
+      uploadTasksMap.remove(uploadId)
+    }
+
+    /**
      * Called by each task when it is completed (either successfully, with an error or due to
      * user cancellation).
      * @param uploadId the uploadID of the finished task

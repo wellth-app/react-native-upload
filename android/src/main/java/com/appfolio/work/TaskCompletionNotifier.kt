@@ -34,6 +34,7 @@ class TaskCompletionNotifier : UploadTaskObserver {
       notificationConfig: UploadNotificationConfig,
       exception: Throwable
   ) {
+    UploadManager.taskFailed(info.uploadId)
   }
 
   override fun onCompleted(
