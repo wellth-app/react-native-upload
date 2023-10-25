@@ -43,7 +43,7 @@ fun Context.getUploadTask(
 
         UploadServiceLogger.debug(
             component = UploadManager.TAG,
-            uploadId = "",
+            uploadId = creationParameters.params.id,
             message = {
                 "Successfully created new task with class: ${taskClass.name}"
             }
