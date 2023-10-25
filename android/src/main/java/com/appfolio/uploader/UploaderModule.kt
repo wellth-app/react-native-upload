@@ -73,9 +73,9 @@ class UploaderModule(val reactContext: ReactApplicationContext) : ReactContextBa
     var followRedirects = true
     var followSslRedirects = true
     var retryOnConnectionFailure = true
-    var connectTimeout = 15
-    var writeTimeout = 30
-    var readTimeout = 30
+    var connectTimeout = 45
+    var writeTimeout = 90
+    var readTimeout = 90
     //TODO: make 'cache' customizable
     if (options.hasKey("followRedirects")) {
       if (options.getType("followRedirects") != ReadableType.Boolean) {
