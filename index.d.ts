@@ -94,6 +94,8 @@ declare module '@appfolio/react-native-upload' {
     appGroup?: string;
     // Necessary only for multipart type upload
     field?: string;
+    parts?: UploadParts;
+    partsOrder?: { [key: number | string]: string };
   }
 
   export interface MultipartUploadOptions extends UploadOptions {
@@ -119,7 +121,7 @@ declare module '@appfolio/react-native-upload' {
     Running = 'running',
   }
 
-  export type SystemUploadStates = Array<{ id: string, state: UploadState }>;
+  export type SystemUploadStates = Array<{ id: string; state: UploadState }>;
 
   export default class Upload {
     static startUpload(

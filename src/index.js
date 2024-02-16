@@ -10,6 +10,13 @@ export type NotificationArgs = {
   enabled: boolean,
 };
 
+export type UploadPart = {
+  path: string,
+  field: string,
+};
+
+export type UploadParts = UploadPart[];
+
 export type StartUploadArgs = {
   url: string,
   path: string,
@@ -23,6 +30,8 @@ export type StartUploadArgs = {
   parameters?: { [string]: string },
   headers?: Object,
   notification?: NotificationArgs,
+  parts?: UploadParts,
+  partsOrder?: { [number | string]: string },
 };
 
 const NativeModule =
@@ -50,7 +59,7 @@ Returns an object:
 The promise should never be rejected.
 */
 export const getFileInfo = (path: string): Promise<Object> => {
-  return NativeModule.getFileInfo(path).then(data => {
+  return NativeModule.getFileInfo(path).then((data) => {
     if (data.size) {
       // size comes back as a string on android so we convert it here.  if it's already a number this won't hurt anything
       data.size = +data.size;
@@ -112,7 +121,7 @@ export const addListener = (
   uploadId: string,
   listener: Function,
 ) => {
-  return DeviceEventEmitter.addListener(eventPrefix + eventType, data => {
+  return DeviceEventEmitter.addListener(eventPrefix + eventType, (data) => {
     if (!uploadId || !data || !data.id || data.id === uploadId) {
       listener(data);
     }

@@ -151,6 +151,38 @@ RCT_EXPORT_METHOD(getFileInfo:(NSString *)path resolve:(RCTPromiseResolveBlock)r
     }];
 }
 
+- (NSArray*)normalizePartsFromAssetLibrary:(NSArray*)parts reject:(RCTPromiseRejectBlock)reject {
+    NSMutableArray *returnValue = [NSMutableArray new];
+
+    // TODO: This is next level inefficient. It copies the old dictionary into the new dictionary and appends it to a new array.
+    [parts enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+        NSDictionary *part = obj;
+        NSMutableDictionary *newPart = [NSMutableDictionary dictionaryWithDictionary:part];
+        __block NSString *fileURI = [part objectForKey:@"path"];
+
+        if ([fileURI hasPrefix:@"assets-library"]) {
+            dispatch_group_t group = dispatch_group_create();
+            dispatch_group_enter(group);
+            [self copyAssetToFile:fileURI completionHandler:^(NSString * _Nullable tempFileUrl, NSError * _Nullable error) {
+                if (error) {
+                    dispatch_group_leave(group);
+                    reject(@"RN Uploader", @"Asset could not be copied to temp file.", nil);
+                    return;
+                }
+                fileURI = tempFileUrl;
+                dispatch_group_leave(group);
+            }];
+            dispatch_group_wait(group, DISPATCH_TIME_FOREVER);
+
+            [newPart setValue:fileURI forKey:@"path"];
+        }
+
+        [returnValue addObject:newPart];
+    }];
+
+    return returnValue;
+}
+
 /*
  * Starts a file upload.
  * Options are passed in as the first argument as a js hash:
@@ -173,6 +205,8 @@ RCT_EXPORT_METHOD(startUpload:(NSDictionary *)options resolve:(RCTPromiseResolve
     NSString *appGroup = options[@"appGroup"];
     NSDictionary *headers = options[@"headers"];
     NSDictionary *parameters = options[@"parameters"];
+    __block NSArray *uploadParts = options[@"parts"];
+    __block NSDictionary *partsOrder = options[@"partsOrder"];
 
     @try {
         NSURL *requestUrl = [NSURL URLWithString: uploadUrl];
@@ -213,6 +247,7 @@ RCT_EXPORT_METHOD(startUpload:(NSDictionary *)options resolve:(RCTPromiseResolve
         NSURLSessionUploadTask *uploadTask;
 
         if ([uploadType isEqualToString:@"multipart"]) {
+            NSArray *normalizedParts = [self normalizePartsFromAssetLibrary:uploadParts reject:reject];
             NSString *uuidStr = [[NSUUID UUID] UUIDString];
             [request setValue:[NSString stringWithFormat:@"multipart/form-data; boundary=%@", uuidStr] forHTTPHeaderField:@"Content-Type"];
 
@@ -221,8 +256,12 @@ RCT_EXPORT_METHOD(startUpload:(NSDictionary *)options resolve:(RCTPromiseResolve
             NSURL *multipartDataFileUrl = [NSURL fileURLWithPath:[NSString stringWithFormat:@"%@/%@", [self getTmpDirectory], uploadId]];
             [multipartData writeToURL:multipartDataFileUrl atomically:YES];
 
-            uploadTask = [[self urlSession: appGroup] uploadTaskWithRequest:request fromFile:multipartDataFileUrl];
+            NSData *httpBody = [self createBodyWithBoundary:uuidStr parameters:parameters parts:normalizedParts order:partsOrder];  
+            [request setHTTPBody: httpBody];
+            uploadTask = [[self urlSession:appGroup] uploadTaskWithStreamedRequest:request];
+            //uploadTask = [[self urlSession: appGroup] uploadTaskWithRequest:request fromFile:multipartDataFileUrl];
         } else {
+
             if (parameters.count > 0) {
                 reject(@"RN Uploader", @"Parameters supported only in multipart type", nil);
                 return;
@@ -305,7 +344,8 @@ RCT_EXPORT_METHOD(getAllUploads:(RCTPromiseResolveBlock)resolve
 - (NSData *)createBodyWithBoundary:(NSString *)boundary
             path:(NSString *)path
             parameters:(NSDictionary *)parameters
-            fieldName:(NSString *)fieldName {
+            parts:(NSArray *)parts
+            order:(NSDictionary *)partsOrder {
 
     NSMutableData *httpBody = [NSMutableData data];
 
