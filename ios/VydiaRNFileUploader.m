@@ -251,10 +251,10 @@ RCT_EXPORT_METHOD(startUpload:(NSDictionary *)options resolve:(RCTPromiseResolve
             NSString *uuidStr = [[NSUUID UUID] UUIDString];
             [request setValue:[NSString stringWithFormat:@"multipart/form-data; boundary=%@", uuidStr] forHTTPHeaderField:@"Content-Type"];
 
-            NSData *multipartData = [self createBodyWithBoundary:uuidStr path:fileURI parameters: parameters fieldName:fieldName];
+            //NSData *multipartData = [self createBodyWithBoundary:uuidStr path:fileURI parameters: parameters fieldName:fieldName];
             
-            NSURL *multipartDataFileUrl = [NSURL fileURLWithPath:[NSString stringWithFormat:@"%@/%@", [self getTmpDirectory], uploadId]];
-            [multipartData writeToURL:multipartDataFileUrl atomically:YES];
+            //NSURL *multipartDataFileUrl = [NSURL fileURLWithPath:[NSString stringWithFormat:@"%@/%@", [self getTmpDirectory], uploadId]];
+            //[multipartData writeToURL:multipartDataFileUrl atomically:YES];
 
             NSData *httpBody = [self createBodyWithBoundary:uuidStr parameters:parameters parts:normalizedParts order:partsOrder];  
             [request setHTTPBody: httpBody];
@@ -342,6 +342,72 @@ RCT_EXPORT_METHOD(getAllUploads:(RCTPromiseResolveBlock)resolve
 }
 
 - (NSData *)createBodyWithBoundary:(NSString *)boundary
+                        parameters:(NSDictionary *)parameters
+                             parts:(NSArray *)parts
+                             order:(NSDictionary *)partsOrder {
+    NSMutableData *httpBody = [NSMutableData data];
+
+    // Ensure that `partsOrder` is sorted by keys
+    NSArray *sortedKeys = [[partsOrder allKeys] sortedArrayUsingComparator:^NSComparisonResult(id obj1, id obj2) {
+        if ([obj1 intValue] == [obj2 intValue]) {
+            return NSOrderedSame;
+        } else if ([obj1 intValue] < [obj2 intValue]) {
+            return NSOrderedAscending;
+        } else {
+            return NSOrderedDescending;
+        }
+    }];
+    
+    // Create a dictionary sorted by keys
+    NSDictionary *sortedParts = [partsOrder dictionaryWithValuesForKeys:sortedKeys];
+    
+    // Add parts as dictated by `sortedParts` to the request body, tracking those parts in an array so they're
+    // not added again.
+    NSMutableArray *trackedParts = [NSMutableArray new];
+    [sortedParts enumerateKeysAndObjectsUsingBlock:^(NSString *key, NSString *value, BOOL *stop) {
+        [trackedParts addObject:value];
+        NSString *parameter = [parameters objectForKey:value];
+        
+        [httpBody appendData:[[NSString stringWithFormat:@"--%@\r\n", boundary] dataUsingEncoding:NSUTF8StringEncoding]];
+        [httpBody appendData:[[NSString stringWithFormat:@"Content-Disposition: form-data; name=\"%@\"\r\n\r\n", value] dataUsingEncoding:NSUTF8StringEncoding]];
+        [httpBody appendData:[[NSString stringWithFormat:@"%@\r\n", parameter] dataUsingEncoding:NSUTF8StringEncoding]];
+    }];
+    
+    // Put each parameter (that's not already tracked!) in it's own part, delimited by the boundary
+    [parameters enumerateKeysAndObjectsUsingBlock:^(NSString *parameterKey, NSString *parameterValue, BOOL *stop) {
+        if ([trackedParts containsObject:parameterKey]) {
+            return;
+        }
+        
+        [httpBody appendData:[[NSString stringWithFormat:@"--%@\r\n", boundary] dataUsingEncoding:NSUTF8StringEncoding]];
+        [httpBody appendData:[[NSString stringWithFormat:@"Content-Disposition: form-data; name=\"%@\"\r\n\r\n", parameterKey] dataUsingEncoding:NSUTF8StringEncoding]];
+        [httpBody appendData:[[NSString stringWithFormat:@"%@\r\n", parameterValue] dataUsingEncoding:NSUTF8StringEncoding]];
+    }];
+    
+    // Put each part in it's own part, delimited by the boundary
+    [parts enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+        NSDictionary *part = obj;
+        NSString *path = [part objectForKey:@"path"];
+        NSString *fieldName = [part objectForKey:@"field"];
+        
+        NSData *data = [VydiaRNFileUploader dataForFile:path];
+        NSString *filename  = [path lastPathComponent];
+        NSString *mimetype  = [self guessMIMETypeFromFileName:path];
+        
+        [httpBody appendData:[[NSString stringWithFormat:@"--%@\r\n", boundary] dataUsingEncoding:NSUTF8StringEncoding]];
+        [httpBody appendData:[[NSString stringWithFormat:@"Content-Disposition: form-data; name=\"%@\"; filename=\"%@\"\r\n", fieldName, filename] dataUsingEncoding:NSUTF8StringEncoding]];
+        [httpBody appendData:[[NSString stringWithFormat:@"Content-Type: %@\r\n\r\n", mimetype] dataUsingEncoding:NSUTF8StringEncoding]];
+        [httpBody appendData:data];
+        [httpBody appendData:[@"\r\n" dataUsingEncoding:NSUTF8StringEncoding]];
+    }];
+
+    // Write a boundary to conclude the request body
+    [httpBody appendData:[[NSString stringWithFormat:@"--%@--\r\n", boundary] dataUsingEncoding:NSUTF8StringEncoding]];
+    
+    return httpBody;
+}
+
+/*- (NSData *)createBodyWithBoundary:(NSString *)boundary
             path:(NSString *)path
             parameters:(NSDictionary *)parameters
             parts:(NSArray *)parts
@@ -380,7 +446,7 @@ RCT_EXPORT_METHOD(getAllUploads:(RCTPromiseResolveBlock)resolve
     [httpBody appendData:[[NSString stringWithFormat:@"--%@--\r\n", boundary] dataUsingEncoding:NSUTF8StringEncoding]];
 
     return httpBody;
-}
+}*/
 
 - (NSURLSession *)urlSession: (NSString *) groupId {
     if (_urlSession == nil) {
