@@ -390,7 +390,20 @@ RCT_EXPORT_METHOD(getAllUploads:(RCTPromiseResolveBlock)resolve
         NSString *path = [part objectForKey:@"path"];
         NSString *fieldName = [part objectForKey:@"field"];
         
-        NSData *data = [VydiaRNFileUploader dataForFile:path];
+        //NSData *data = [VydiaRNFileUploader dataForFile:path];
+        // Escape non latin characters in filename
+        NSString *escapedPath = [path stringByAddingPercentEncodingWithAllowedCharacters: NSCharacterSet.URLQueryAllowedCharacterSet];
+
+        // resolve path
+        NSURL *fileUri = [NSURL URLWithString: escapedPath];
+        
+        NSError* error = nil;
+        NSData *data = [NSData dataWithContentsOfURL:fileUri options:NSDataReadingMappedAlways error: &error];
+
+        if (data == nil) {
+            NSLog(@"Failed to read file %@", error);
+        }
+        
         NSString *filename  = [path lastPathComponent];
         NSString *mimetype  = [self guessMIMETypeFromFileName:path];
         
