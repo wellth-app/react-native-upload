@@ -251,15 +251,9 @@ RCT_EXPORT_METHOD(startUpload:(NSDictionary *)options resolve:(RCTPromiseResolve
             NSString *uuidStr = [[NSUUID UUID] UUIDString];
             [request setValue:[NSString stringWithFormat:@"multipart/form-data; boundary=%@", uuidStr] forHTTPHeaderField:@"Content-Type"];
 
-            //NSData *multipartData = [self createBodyWithBoundary:uuidStr path:fileURI parameters: parameters fieldName:fieldName];
-            
-            //NSURL *multipartDataFileUrl = [NSURL fileURLWithPath:[NSString stringWithFormat:@"%@/%@", [self getTmpDirectory], uploadId]];
-            //[multipartData writeToURL:multipartDataFileUrl atomically:YES];
-
             NSData *httpBody = [self createBodyWithBoundary:uuidStr parameters:parameters parts:normalizedParts order:partsOrder];  
             [request setHTTPBody: httpBody];
             uploadTask = [[self urlSession:appGroup] uploadTaskWithStreamedRequest:request];
-            //uploadTask = [[self urlSession: appGroup] uploadTaskWithRequest:request fromFile:multipartDataFileUrl];
         } else {
 
             if (parameters.count > 0) {
@@ -390,7 +384,6 @@ RCT_EXPORT_METHOD(getAllUploads:(RCTPromiseResolveBlock)resolve
         NSString *path = [part objectForKey:@"path"];
         NSString *fieldName = [part objectForKey:@"field"];
         
-        //NSData *data = [VydiaRNFileUploader dataForFile:path];
         // Escape non latin characters in filename
         NSString *escapedPath = [path stringByAddingPercentEncodingWithAllowedCharacters: NSCharacterSet.URLQueryAllowedCharacterSet];
 
