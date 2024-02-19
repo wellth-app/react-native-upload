@@ -96,6 +96,9 @@ declare module '@appfolio/react-native-upload' {
     field?: string;
     parts?: UploadParts;
     partsOrder?: { [key: number | string]: string };
+    parameters?: {
+      [index: string]: string;
+    };
   }
 
   export interface MultipartUploadOptions extends UploadOptions {
