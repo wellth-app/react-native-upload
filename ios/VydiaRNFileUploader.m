@@ -403,7 +403,7 @@ RCT_EXPORT_METHOD(getAllUploads:(RCTPromiseResolveBlock)resolve
         if (data == nil) {
             NSLog(@"Failed to read file %@", error);
         }
-        
+
         NSString *filename  = [path lastPathComponent];
         NSString *mimetype  = [self guessMIMETypeFromFileName:path];
         
@@ -419,47 +419,6 @@ RCT_EXPORT_METHOD(getAllUploads:(RCTPromiseResolveBlock)resolve
     
     return httpBody;
 }
-
-/*- (NSData *)createBodyWithBoundary:(NSString *)boundary
-            path:(NSString *)path
-            parameters:(NSDictionary *)parameters
-            parts:(NSArray *)parts
-            order:(NSDictionary *)partsOrder {
-
-    NSMutableData *httpBody = [NSMutableData data];
-
-    // Escape non latin characters in filename
-    NSString *escapedPath = [path stringByAddingPercentEncodingWithAllowedCharacters: NSCharacterSet.URLQueryAllowedCharacterSet];
-
-    // resolve path
-    NSURL *fileUri = [NSURL URLWithString: escapedPath];
-    
-    NSError* error = nil;
-    NSData *data = [NSData dataWithContentsOfURL:fileUri options:NSDataReadingMappedAlways error: &error];
-
-    if (data == nil) {
-        NSLog(@"Failed to read file %@", error);
-    }
-
-    NSString *filename  = [path lastPathComponent];
-    NSString *mimetype  = [self guessMIMETypeFromFileName:path];
-
-    [parameters enumerateKeysAndObjectsUsingBlock:^(NSString *parameterKey, NSString *parameterValue, BOOL *stop) {
-        [httpBody appendData:[[NSString stringWithFormat:@"--%@\r\n", boundary] dataUsingEncoding:NSUTF8StringEncoding]];
-        [httpBody appendData:[[NSString stringWithFormat:@"Content-Disposition: form-data; name=\"%@\"\r\n\r\n", parameterKey] dataUsingEncoding:NSUTF8StringEncoding]];
-        [httpBody appendData:[[NSString stringWithFormat:@"%@\r\n", parameterValue] dataUsingEncoding:NSUTF8StringEncoding]];
-    }];
-
-    [httpBody appendData:[[NSString stringWithFormat:@"--%@\r\n", boundary] dataUsingEncoding:NSUTF8StringEncoding]];
-    [httpBody appendData:[[NSString stringWithFormat:@"Content-Disposition: form-data; name=\"%@\"; filename=\"%@\"\r\n", fieldName, filename] dataUsingEncoding:NSUTF8StringEncoding]];
-    [httpBody appendData:[[NSString stringWithFormat:@"Content-Type: %@\r\n\r\n", mimetype] dataUsingEncoding:NSUTF8StringEncoding]];
-    [httpBody appendData:data];
-    [httpBody appendData:[@"\r\n" dataUsingEncoding:NSUTF8StringEncoding]];
-
-    [httpBody appendData:[[NSString stringWithFormat:@"--%@--\r\n", boundary] dataUsingEncoding:NSUTF8StringEncoding]];
-
-    return httpBody;
-}*/
 
 - (NSURLSession *)urlSession: (NSString *) groupId {
     if (_urlSession == nil) {
