@@ -229,6 +229,8 @@ class UploaderModule(val reactContext: ReactApplicationContext) : ReactContextBa
             promise.reject(java.lang.IllegalArgumentException("The type for argument 'field' must be a string!"))
           }
 
+          Log.d("currentPartPathWithoutPrefix", currentPartPathWithoutPrefix!!);
+          Log.d("currentPart", currentPart?.getString("field")!!);
           mRequest.addFileToUpload(currentPartPathWithoutPrefix!!, currentPart?.getString("field")!!)
         }
         mRequest
@@ -306,7 +308,7 @@ class UploaderModule(val reactContext: ReactApplicationContext) : ReactContextBa
           if (trackedParts.contains(key)) {
             continue
           }
-          
+
           if (parameters.getType(key) != ReadableType.String) {
             promise.reject(java.lang.IllegalArgumentException("Parameters must be string key/values. Value was invalid for '$key'"))
             return
