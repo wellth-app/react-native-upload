@@ -35,6 +35,8 @@ class ModifiedMultipartUploadRequest(context: Context, serverUrl: String, limitN
       fileName: String? = null,
       contentType: String? = null
   ): ModifiedMultipartUploadRequest {
+    Log.d("filePath", filePath);
+    Log.d("parameterName", parameterName);
     require(filePath.isNotBlank() && parameterName.isNotBlank()) {
       "Please specify valid filePath and parameterName. They cannot be blank."
     }
