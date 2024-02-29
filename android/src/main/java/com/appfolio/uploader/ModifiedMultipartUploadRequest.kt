@@ -1,6 +1,7 @@
 package com.appfolio.uploader
 
 import android.content.Context
+import android.util.Log
 import com.appfolio.extensions.contentType
 import com.appfolio.extensions.parameterName
 import com.appfolio.extensions.remoteFileName
@@ -8,7 +9,6 @@ import net.gotev.uploadservice.UploadTask
 import net.gotev.uploadservice.data.UploadFile
 import net.gotev.uploadservice.protocols.multipart.MultipartUploadTask
 import java.io.FileNotFoundException
-import android.util.Log
 
 class ModifiedMultipartUploadRequest(context: Context, serverUrl: String, limitNetwork: Boolean)  :
     ModifiedHttpUploadRequest<ModifiedMultipartUploadRequest>(context, serverUrl, limitNetwork) {

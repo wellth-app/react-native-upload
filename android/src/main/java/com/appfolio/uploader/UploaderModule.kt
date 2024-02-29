@@ -23,7 +23,6 @@ import okhttp3.OkHttpClient
 import java.io.File
 import java.util.concurrent.TimeUnit
 import java.util.TreeMap
-import android.util.Log
 
 class UploaderModule(val reactContext: ReactApplicationContext) : ReactContextBaseJavaModule(reactContext), LifecycleEventListener {
   private val TAG = "UploaderBridge"
