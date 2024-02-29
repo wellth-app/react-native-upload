@@ -23,7 +23,6 @@ import okhttp3.OkHttpClient
 import java.io.File
 import java.util.concurrent.TimeUnit
 import java.util.TreeMap
-import java.util.logging.Logger
 
 class UploaderModule(val reactContext: ReactApplicationContext) : ReactContextBaseJavaModule(reactContext), LifecycleEventListener {
   private val TAG = "UploaderBridge"
@@ -230,8 +229,8 @@ class UploaderModule(val reactContext: ReactApplicationContext) : ReactContextBa
             promise.reject(java.lang.IllegalArgumentException("The type for argument 'field' must be a string!"))
           }
 
-          Log.d("currentPartPathWithoutPrefix", currentPartPathWithoutPrefix!!);
-          Log.d("currentPart", currentPart?.getString("field")!!);
+          print("currentPartPathWithoutPrefix", currentPartPathWithoutPrefix!!);
+          print("currentPart", currentPart?.getString("field")!!);
           mRequest.addFileToUpload(currentPartPathWithoutPrefix!!, currentPart?.getString("field")!!)
         }
         mRequest
