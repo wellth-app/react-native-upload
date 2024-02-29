@@ -202,16 +202,6 @@ class UploaderModule(val reactContext: ReactApplicationContext) : ReactContextBa
         ModifiedBinaryUploadRequest(this.reactApplicationContext, url!!, limitNetwork)
                 .setFileToUpload(filePath!!)
       } else {
-        /*if (!options.hasKey("field")) {
-          promise.reject(java.lang.IllegalArgumentException("field is required field for multipart type."))
-          return
-        }
-        if (options.getType("field") != ReadableType.String) {
-          promise.reject(java.lang.IllegalArgumentException("field must be string."))
-          return
-        }
-        ModifiedMultipartUploadRequest(this.reactApplicationContext, url!!, limitNetwork)
-                .addFileToUpload(filePath!!, options.getString("field")!!)*/
         if (parts != null && parts.size() < 1) {
           promise.reject(java.lang.IllegalArgumentException("For a multipart upload, parts must have size of at least 1!"))
         }
@@ -229,8 +219,6 @@ class UploaderModule(val reactContext: ReactApplicationContext) : ReactContextBa
             promise.reject(java.lang.IllegalArgumentException("The type for argument 'field' must be a string!"))
           }
 
-          Log.d("currentPartPathWithoutPrefix", currentPartPathWithoutPrefix!!);
-          Log.d("currentPart", currentPart?.getString("field")!!);
           mRequest.addFileToUpload(currentPartPathWithoutPrefix!!, currentPart?.getString("field")!!)
         }
         mRequest
