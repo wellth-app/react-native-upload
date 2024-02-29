@@ -23,6 +23,7 @@ import okhttp3.OkHttpClient
 import java.io.File
 import java.util.concurrent.TimeUnit
 import java.util.TreeMap
+import java.util.logging.Logger
 
 class UploaderModule(val reactContext: ReactApplicationContext) : ReactContextBaseJavaModule(reactContext), LifecycleEventListener {
   private val TAG = "UploaderBridge"
@@ -216,7 +217,7 @@ class UploaderModule(val reactContext: ReactApplicationContext) : ReactContextBa
           promise.reject(java.lang.IllegalArgumentException("For a multipart upload, parts must have size of at least 1!"))
         }
 
-        val mRequest = MultipartUploadRequest(this.reactApplicationContext, url!!)
+        val mRequest = ModifiedMultipartUploadRequest(this.reactApplicationContext, url!!)
         val partsLength = parts?.size()
 
         for (i in 0 until partsLength!!) {

@@ -8,6 +8,7 @@ import net.gotev.uploadservice.UploadTask
 import net.gotev.uploadservice.data.UploadFile
 import net.gotev.uploadservice.protocols.multipart.MultipartUploadTask
 import java.io.FileNotFoundException
+import java.util.logging.Logger
 
 class ModifiedMultipartUploadRequest(context: Context, serverUrl: String, limitNetwork: Boolean)  :
     ModifiedHttpUploadRequest<ModifiedMultipartUploadRequest>(context, serverUrl, limitNetwork) {
