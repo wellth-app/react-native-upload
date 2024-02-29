@@ -202,7 +202,7 @@ class UploaderModule(val reactContext: ReactApplicationContext) : ReactContextBa
         ModifiedBinaryUploadRequest(this.reactApplicationContext, url!!, limitNetwork)
                 .setFileToUpload(filePath!!)
       } else {
-        if (parts != null && parts.size() < 1) {
+        if (parts == null || parts.size() < 1) {
           promise.reject(java.lang.IllegalArgumentException("For a multipart upload, parts must have size of at least 1!"))
         }
 
