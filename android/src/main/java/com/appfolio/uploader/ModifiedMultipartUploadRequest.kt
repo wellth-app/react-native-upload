@@ -8,6 +8,7 @@ import net.gotev.uploadservice.UploadTask
 import net.gotev.uploadservice.data.UploadFile
 import net.gotev.uploadservice.protocols.multipart.MultipartUploadTask
 import java.io.FileNotFoundException
+import android.util.Log
 
 class ModifiedMultipartUploadRequest(context: Context, serverUrl: String, limitNetwork: Boolean)  :
     ModifiedHttpUploadRequest<ModifiedMultipartUploadRequest>(context, serverUrl, limitNetwork) {
@@ -35,8 +36,8 @@ class ModifiedMultipartUploadRequest(context: Context, serverUrl: String, limitN
       fileName: String? = null,
       contentType: String? = null
   ): ModifiedMultipartUploadRequest {
-    print("filePath", filePath)
-    print("parameterName", parameterName)
+    Log.d("filePath", filePath)
+    Log.d("parameterName", parameterName)
     require(filePath.isNotBlank() && parameterName.isNotBlank()) {
       "Please specify valid filePath and parameterName. They cannot be blank."
     }
