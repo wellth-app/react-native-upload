@@ -216,7 +216,7 @@ class UploaderModule(val reactContext: ReactApplicationContext) : ReactContextBa
           promise.reject(java.lang.IllegalArgumentException("For a multipart upload, parts must have size of at least 1!"))
         }
 
-        val mRequest = ModifiedMultipartUploadRequest(this.reactApplicationContext, url!!)
+        val mRequest = ModifiedMultipartUploadRequest(this.reactApplicationContext, url!!, limitNetwork)
         val partsLength = parts?.size()
 
         for (i in 0 until partsLength!!) {
