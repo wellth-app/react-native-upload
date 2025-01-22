@@ -74,7 +74,7 @@ dependencies {
     //noinspection GradleDependency
     implementation 'net.gotev:uploadservice:4.7.0'
     //noinspection GradleDependency
-    implementation 'net.gotev:uploadservice-okhttp:4.7.0'
+    implementation 'net.gotev:uploadservice-okhttp:4.9.2'
 
     implementation 'androidx.swiperefreshlayout:swiperefreshlayout:1.1.0'
     implementation 'com.google.code.gson:gson:2.10.1'
