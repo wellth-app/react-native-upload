@@ -1,0 +1,24 @@
+{
+  "configurations" : [
+    {
+      "id" : "B888433A-2761-403C-8E4C-03D0F0722AF5",
+      "name" : "Test Scheme Action",
+      "options" : {
+
+      }
+    }
+  ],
+  "defaultOptions" : {
+    "codeCoverage" : false
+  },
+  "testTargets" : [
+    {
+      "target" : {
+        "containerPath" : "container:VydiaRNFileUploader.xcodeproj",
+        "identifier" : "4D9042552B89088400B77800",
+        "name" : "Tests"
+      }
+    }
+  ],
+  "version" : 1
+}

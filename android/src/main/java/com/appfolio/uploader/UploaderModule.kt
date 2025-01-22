@@ -22,6 +22,7 @@ import net.gotev.uploadservice.okhttp.OkHttpStack
 import okhttp3.OkHttpClient
 import java.io.File
 import java.util.concurrent.TimeUnit
+import java.util.TreeMap
 
 class UploaderModule(val reactContext: ReactApplicationContext) : ReactContextBaseJavaModule(reactContext), LifecycleEventListener {
   private val TAG = "UploaderBridge"
@@ -191,6 +192,7 @@ class UploaderModule(val reactContext: ReactApplicationContext) : ReactContextBa
     }
 
     val url = options.getString("url")
+    val parts = options.getArray("parts")
     val filePath = options.getString("path")
     val method = if (options.hasKey("method") && options.getType("method") == ReadableType.String) options.getString("method") else "POST"
     val maxRetries = if (options.hasKey("maxRetries") && options.getType("maxRetries") == ReadableType.Number) options.getInt("maxRetries") else 2
@@ -200,16 +202,26 @@ class UploaderModule(val reactContext: ReactApplicationContext) : ReactContextBa
         ModifiedBinaryUploadRequest(this.reactApplicationContext, url!!, limitNetwork)
                 .setFileToUpload(filePath!!)
       } else {
-        if (!options.hasKey("field")) {
-          promise.reject(java.lang.IllegalArgumentException("field is required field for multipart type."))
-          return
+        if (parts == null || parts.size() < 1) {
+          promise.reject(java.lang.IllegalArgumentException("For a multipart upload, parts must have size of at least 1!"))
         }
-        if (options.getType("field") != ReadableType.String) {
-          promise.reject(java.lang.IllegalArgumentException("field must be string."))
-          return
+
+        val mRequest = ModifiedMultipartUploadRequest(this.reactApplicationContext, url!!, limitNetwork)
+        val partsLength = parts?.size()
+
+        for (i in 0 until partsLength!!) {
+          val currentPart = parts?.getMap(i)
+          val currentPartFieldType = currentPart?.getType("field")
+          val currentPartPath = currentPart?.getString("path")
+          val currentPartPathWithoutPrefix = currentPartPath?.removePrefix("file://")
+
+          if (currentPartFieldType != ReadableType.String) {
+            promise.reject(java.lang.IllegalArgumentException("The type for argument 'field' must be a string!"))
+          }
+
+          mRequest.addFileToUpload(currentPartPathWithoutPrefix!!, currentPart?.getString("field")!!)
         }
-        ModifiedMultipartUploadRequest(this.reactApplicationContext, url!!, limitNetwork)
-                .addFileToUpload(filePath!!, options.getString("field")!!)
+        mRequest
       }
       request.setMethod(method!!)
               .setMaxRetries(maxRetries)
@@ -245,9 +257,46 @@ class UploaderModule(val reactContext: ReactApplicationContext) : ReactContextBa
           return
         }
         val parameters = options.getMap("parameters")
+        val partsOrder = options.getMap("partsOrder")
+        val sortedPartsOrder = TreeMap<String, String>()
+        val trackedParts = mutableListOf<String>()
+
+        // Assert that all value parts in the partsOrder map are strings (we
+        // can't assume this due to the nature of ReadableMap)
+        val partsOrderIterator = partsOrder!!.keySetIterator()
+        while (partsOrderIterator.hasNextKey()) {
+          val key = partsOrderIterator.nextKey()
+
+          if (partsOrder.getType(key) != ReadableType.String) {
+            promise.reject(java.lang.IllegalArgumentException("Parameter value for '$key' must be a string!"))
+            return
+          }
+
+          sortedPartsOrder.put(key, partsOrder.getString(key)!!)
+        }
+
+        // For each key in the sorted parts map, add it as a request parameter
+        // and then add it to tracked parts 
+        for ((key, value) in sortedPartsOrder) {
+          if (parameters!!.getType(value) != ReadableType.String) {
+            promise.reject(java.lang.IllegalArgumentException("Parameter value for '$key' must be a string!"))
+            return
+          }
+
+          request.addParameter(value, parameters.getString(value)!!)
+          trackedParts.add(value)
+        }
+
+        // Loop through all the parameter keys again to add any ones that may
+        // not have been included in the sorted parts map
         val keys = parameters!!.keySetIterator()
         while (keys.hasNextKey()) {
           val key = keys.nextKey()
+
+          if (trackedParts.contains(key)) {
+            continue
+          }
+
           if (parameters.getType(key) != ReadableType.String) {
             promise.reject(java.lang.IllegalArgumentException("Parameters must be string key/values. Value was invalid for '$key'"))
             return
